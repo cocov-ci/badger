@@ -1,0 +1,28 @@
+#!/bin/bash
+
+set -e
+
+ARCH="$1"
+TAG="$2"
+
+case "$ARCH" in
+  "aarch64-unknown-linux-gnu")
+    export LINUX_ARCH="arm64v8";
+  ;;
+
+  "x86_64-unknown-linux-gnu")
+    export LINUX_ARCH="amd64";
+  ;;
+
+  *)
+    echo "Unknown architecture $ARCH"
+    exit 1
+  ;;
+esac
+
+docker build \
+  -t "cocov/badger:$TAG-$LINUX_ARCH" \
+  --build-arg ARCH="$LINUX_ARCH"/ \
+  --build-arg BUILDARCH="$ARCH" .
+
+docker push "cocov/badger:$TAG-$LINUX_ARCH"

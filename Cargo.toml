@@ -1,0 +1,28 @@
+[package]
+name = "badger"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+openssl = { version = "0.10", features = ["vendored"] }
+actix-web = "4"
+shield-maker = "0.1.0"
+env_logger = "0.10.0"
+async-trait = "0.1.60"
+ab_glyph = "0.2.18"
+reqwest = "0.11"
+derive_more = "0.99.17"
+
+[package.metadata.cross.build.target.x86_64-unknown-linux-gnu]
+pre-build = [
+    "dpkg --add-architecture $CROSS_DEB_ARCH",
+    "apt-get update && apt-get install --assume-yes libssl-dev:$CROSS_DEB_ARCH"
+]
+
+[package.metadata.cross.build.target.aarch64-unknown-linux-gnu]
+pre-build = [
+    "dpkg --add-architecture $CROSS_DEB_ARCH",
+    "apt-get update && apt-get install --assume-yes libssl-dev:$CROSS_DEB_ARCH"
+]
