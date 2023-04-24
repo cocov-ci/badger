@@ -22,12 +22,6 @@ jobs:
     if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     needs: test
-    strategy:
-      matrix:
-        target:
-          - aarch64-unknown-linux-gnu
-          - x86_64-unknown-linux-gnu
-
     steps:
       - name: Checkout
         uses: actions/checkout@v1
@@ -37,8 +31,6 @@ jobs:
         with:
           toolchain: stable
           profile: minimal
-          override: true
-          target: ${{ matrix.target }}
 
       - name: Install development dependencies
         run: sudo apt-get install libssl-dev
@@ -48,7 +40,7 @@ jobs:
         with:
           use-cross: true
           command: build
-          args: --release --target ${{ matrix.target }}
+          args: --release
 
       - name: Login to Docker Hub
         uses: docker/login-action@v2
@@ -57,31 +49,14 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Docker Build
-        run: script/docker-build ${{ matrix.target }} dev
+        run: docker build -t "cocov/badger:dev" .
 
-  manifest:
-    runs-on: ubuntu-latest
-    needs: [build]
-    steps:
-      - name: Login to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKER_LOGIN }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: Create Manifest
-        run: |
-          docker manifest create \
-            cocov/badger:dev \
-            --amend cocov/badger:dev-amd64 \
-            --amend cocov/badger:dev-arm64v8
-
-      - name: Push Manifest
-        run: docker manifest push cocov/badger:dev
+      - name: Docker Push
+        run: docker push "cocov/badger:dev"
 
   deploy:
    runs-on: ubuntu-latest
-   needs: [manifest]
+   needs: [build]
    steps:
     - name: Trigger update
       uses: appleboy/ssh-action@v0.1.6

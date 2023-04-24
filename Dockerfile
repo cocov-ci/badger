@@ -1,8 +1,5 @@
-ARG ARCH=
-FROM ${ARCH}debian:buster-slim
+FROM debian:buster-slim
 
-ARG BUILDARCH=
+COPY ./target/release/badger /bin/badger
 
-COPY ./target/${BUILDARCH}/release/badger /bin/badger
-
-CMD "badger"
+ENTRYPOINT ["/bin/badger"]
